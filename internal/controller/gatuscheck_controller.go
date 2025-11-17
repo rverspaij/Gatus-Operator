@@ -85,7 +85,7 @@ func (r *GatusCheckReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	for _, gatus := range gatusList.Items {
 		if gatus.Spec.Enabled {
 			var endpoint EndPoint
-			endpoint.Name = gatus.ObjectMeta.Name
+			endpoint.Name = gatus.Name
 			endpoint.Group = gatus.Spec.Group
 			endpoint.URL = gatus.Spec.URL
 			endpoint.Interval = gatus.Spec.Interval
@@ -140,7 +140,7 @@ func (r *GatusCheckReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		}
 	}
 
-	hash := sha256.Sum256([]byte(yamlData))
+	hash := sha256.Sum256(yamlData)
 	hashString := hex.EncodeToString(hash[:])
 
 	var deployment appsv1.Deployment
@@ -152,14 +152,14 @@ func (r *GatusCheckReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 
-	if deployment.Spec.Template.ObjectMeta.Annotations == nil {
-		deployment.Spec.Template.ObjectMeta.Annotations = map[string]string{}
+	if deployment.Spec.Template.Annotations == nil {
+		deployment.Spec.Template.Annotations = map[string]string{}
 	}
 
-	oldHash := deployment.Spec.Template.ObjectMeta.Annotations["configHash"]
+	oldHash := deployment.Spec.Template.Annotations["configHash"]
 	if oldHash != hashString {
 		log.Info("Configuration changed - triggering Gatus restart", "oldHash", oldHash, "newHash", hashString)
-		deployment.Spec.Template.ObjectMeta.Annotations["configHash"] = hashString
+		deployment.Spec.Template.Annotations["configHash"] = hashString
 
 		if err := r.Update(ctx, &deployment); err != nil {
 			log.Error(err, "failed to update Gatus Deployment with configHash")
