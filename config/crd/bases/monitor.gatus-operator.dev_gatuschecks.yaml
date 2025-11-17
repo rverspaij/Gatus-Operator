@@ -43,8 +43,6 @@ spec:
                 items:
                   type: string
                 type: array
-              configNamespace:
-                type: string
               enabled:
                 type: boolean
               group:

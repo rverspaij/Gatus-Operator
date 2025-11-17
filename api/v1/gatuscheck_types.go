@@ -31,9 +31,6 @@ type GatusCheckSpec struct {
 	Interval   string   `json:"interval,omitempty"`
 	Conditions []string `json:"conditions"`
 
-	// +kubebuilder:validation:Optional
-	ConfigNamespace string `json:"configNamespace,omitempty"`
-
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	// The following markers will use OpenAPI v3 schema to validate the value
