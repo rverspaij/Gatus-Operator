@@ -83,16 +83,21 @@ func (r *GatusCheckReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	var gatusConfig GatusConfig
 
 	for _, gatus := range gatusList.Items {
-		if gatus.Spec.Enabled {
-			var endpoint EndPoint
-			endpoint.Name = gatus.Name
-			endpoint.Group = gatus.Spec.Group
-			endpoint.URL = gatus.Spec.URL
-			endpoint.Interval = gatus.Spec.Interval
-			endpoint.Conditions = gatus.Spec.Conditions
-			gatusConfig.Endpoints = append(gatusConfig.Endpoints, endpoint)
+		if !gatus.Spec.Enabled {
+			continue
 		}
+
+		ep := EndPoint{
+			Name:       gatus.Name,
+			Group:      gatus.Spec.Group,
+			URL:        gatus.Spec.URL,
+			Interval:   gatus.Spec.Interval,
+			Conditions: gatus.Spec.Conditions,
+		}
+
+		gatusConfig.Endpoints = append(gatusConfig.Endpoints, ep)
 	}
+
 	if len(gatusConfig.Endpoints) > 0 {
 		gatusConfig.Enabled = true
 	}
@@ -105,10 +110,15 @@ func (r *GatusCheckReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 
+	configNamespace := "gatus"
+	if len(gatusList.Items) > 0 && gatusList.Items[0].Spec.ConfigNamespace != "" {
+		configNamespace = gatusList.Items[0].Spec.ConfigNamespace
+	}
+
 	configMap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "gatus",
-			Namespace: "gatus",
+			Namespace: configNamespace,
 		},
 		Data: map[string]string{
 			"config.yaml": string(yamlData),
@@ -119,7 +129,7 @@ func (r *GatusCheckReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	var existing corev1.ConfigMap
 
 	if err := r.Get(ctx, client.ObjectKey{
-		Namespace: "gatus",
+		Namespace: configNamespace,
 		Name:      "gatus",
 	}, &existing); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -145,7 +155,7 @@ func (r *GatusCheckReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 	var deployment appsv1.Deployment
 	if err := r.Get(ctx, client.ObjectKey{
-		Namespace: "gatus",
+		Namespace: configNamespace,
 		Name:      "gatus",
 	}, &deployment); err != nil {
 		log.Error(err, "failed to get Gatus Deployment for reload trigger")
