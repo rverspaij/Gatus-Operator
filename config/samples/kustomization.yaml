@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- monitor_v1_gatuscheck.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

@@ -1,0 +1,11 @@
+apiVersion: monitor.gatus-operator.dev/v1
+kind: GatusCheck
+metadata:
+  name: youtube
+  namespace: gatus
+spec:
+  enabled: true
+  group: Video
+  url: https://youtube.com
+  conditions:
+    - "[STATUS] == 200"

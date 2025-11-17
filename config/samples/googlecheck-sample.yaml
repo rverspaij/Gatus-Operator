@@ -1,0 +1,11 @@
+apiVersion: monitor.gatus-operator.dev/v1
+kind: GatusCheck
+metadata:
+  name: google-check
+  namespace: gatus
+spec:
+  enabled: true
+  url: https://google.com
+  interval: 1m
+  conditions:
+    - "[STATUS] == 200"
