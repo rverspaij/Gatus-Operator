@@ -51,6 +51,15 @@ var _ = Describe("GatusCheck Controller", func() {
 						Name:      resourceName,
 						Namespace: "default",
 					},
+					Spec: monitorv1.GatusCheckSpec{
+						Enabled:  true,
+						Group:    "default",
+						URL:      " https://example.com",
+						Interval: "30s",
+						Conditions: []string{
+							"status == 200",
+						},
+					},
 					// TODO(user): Specify other spec details if needed.
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
